@@ -7,6 +7,4 @@ Created on Thu Aug 15 20:37:25 2024
 """
 
 import os
-
-
 print(os.cpu_count())
