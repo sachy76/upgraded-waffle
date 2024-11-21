@@ -6,11 +6,6 @@ Created on Wed Nov 20 16:35:37 2024
 """
 # https://github.com/dask/dask-examples
 
-from dask.distributed import Client, progress
-client = Client(threads_per_worker=8, n_workers=1)
-client
-
-
 import time
 import random
 
@@ -34,8 +29,8 @@ results = []
 for parameters in input_params.values[:20]:
     result = costly_simulation(parameters)
     results.append(result)
-    print(results)
-    
+print(results)
+print("*** without parallel mode for 50 input ***")
 
 # Use Dask Delayed to make our function lazy
 import dask
@@ -44,15 +39,18 @@ for parameters in input_params.values:
     lazy_result = dask.delayed(costly_simulation)(parameters)
     lazy_results.append(lazy_result)
 futures = dask.persist(*lazy_results)  # trigger computation in the background
-#print(lazy_result)
-    
 
 # Execute with Dask Parallel by calling compute
 results = dask.compute(*lazy_results)
-print(results[:5])
+print(results)
+print("*** with Dask parallel compute ***")
 
 
 
+# Execute client threads waiting to take on tasks for executions
+from dask.distributed import Client, progress
+client = Client(threads_per_worker=8, n_workers=1)
+client
 
 # Using Dask Futures API
 futures = []
@@ -61,5 +59,6 @@ for parameters in input_params.values:
     futures.append(future)
 results = client.gather(futures)
 print(len(results))
-print(results[:5])
+print(results)
+print("*** with Dask threading ***")
 
